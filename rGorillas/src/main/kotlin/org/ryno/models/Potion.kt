@@ -56,10 +56,22 @@ sealed class Potion(open val count: Int) {
         }
 
         override fun shouldDeposit() = when (type) {
-            Constants.CombatPotionType.SUPER_ATTACK -> getInventoryItemCount(*ATTACK_POTIONS.sliceArray(0..1)) > 0
-            Constants.CombatPotionType.SUPER_STRENGTH -> getInventoryItemCount(*STRENGTH_POTIONS.sliceArray(0..1)) > 0
-            Constants.CombatPotionType.SUPER_COMBAT -> getInventoryItemCount(*COMBAT_POTIONS.sliceArray(0..1)) > 0
-            Constants.CombatPotionType.DIVINE_SUPER_COMBAT -> getInventoryItemCount(*DIVINE_COMBAT_POTIONS.sliceArray(0..1)) > 0
+            Constants.CombatPotionType.SUPER_ATTACK -> getInventoryItemCount(*ATTACK_POTIONS) > count || getInventoryItemCount(
+                *ATTACK_POTIONS.sliceArray(0..1)
+            ) > 0
+
+            Constants.CombatPotionType.SUPER_STRENGTH -> getInventoryItemCount(*STRENGTH_POTIONS) > count || getInventoryItemCount(
+                *STRENGTH_POTIONS.sliceArray(0..1)
+            ) > 0
+
+            Constants.CombatPotionType.SUPER_COMBAT -> getInventoryItemCount(*COMBAT_POTIONS) > count || getInventoryItemCount(
+                *COMBAT_POTIONS.sliceArray(0..1)
+            ) > 0
+
+            Constants.CombatPotionType.DIVINE_SUPER_COMBAT -> getInventoryItemCount(*DIVINE_COMBAT_POTIONS) > count || getInventoryItemCount(
+                *DIVINE_COMBAT_POTIONS.sliceArray(0..1)
+            ) > 0
+
             else -> false
         }
 
@@ -72,18 +84,18 @@ sealed class Potion(open val count: Int) {
         }
 
         override fun getPotionsToDeposit(): List<Item> = when (type) {
-            Constants.CombatPotionType.SUPER_ATTACK -> getInventoryItems(*ATTACK_POTIONS.sliceArray(0..1))
-            Constants.CombatPotionType.SUPER_STRENGTH -> getInventoryItems(*STRENGTH_POTIONS.sliceArray(0..1))
-            Constants.CombatPotionType.SUPER_COMBAT -> getInventoryItems(*COMBAT_POTIONS.sliceArray(0..1))
-            Constants.CombatPotionType.DIVINE_SUPER_COMBAT -> getInventoryItems(*DIVINE_COMBAT_POTIONS.sliceArray(0..1))
+            Constants.CombatPotionType.SUPER_ATTACK -> getInventoryItems(*ATTACK_POTIONS)
+            Constants.CombatPotionType.SUPER_STRENGTH -> getInventoryItems(*STRENGTH_POTIONS)
+            Constants.CombatPotionType.SUPER_COMBAT -> getInventoryItems(*COMBAT_POTIONS)
+            Constants.CombatPotionType.DIVINE_SUPER_COMBAT -> getInventoryItems(*DIVINE_COMBAT_POTIONS)
             else -> listOf()
         }
 
         override fun getPotionToDrink(): Item = when (type) {
-            Constants.CombatPotionType.SUPER_ATTACK -> getInventoryItem(*ATTACK_POTIONS.sliceArray(0..3))
-            Constants.CombatPotionType.SUPER_STRENGTH -> getInventoryItem(*STRENGTH_POTIONS.sliceArray(0..3))
-            Constants.CombatPotionType.SUPER_COMBAT -> getInventoryItem(*COMBAT_POTIONS.sliceArray(0..3))
-            Constants.CombatPotionType.DIVINE_SUPER_COMBAT -> getInventoryItem(*DIVINE_COMBAT_POTIONS.sliceArray(0..3))
+            Constants.CombatPotionType.SUPER_ATTACK -> getInventoryItem(*ATTACK_POTIONS)
+            Constants.CombatPotionType.SUPER_STRENGTH -> getInventoryItem(*STRENGTH_POTIONS)
+            Constants.CombatPotionType.SUPER_COMBAT -> getInventoryItem(*COMBAT_POTIONS)
+            Constants.CombatPotionType.DIVINE_SUPER_COMBAT -> getInventoryItem(*DIVINE_COMBAT_POTIONS)
             else -> Item.Nil
         }
     }
@@ -101,8 +113,14 @@ sealed class Potion(open val count: Int) {
         }
 
         override fun shouldDeposit() = when (type) {
-            Constants.RangePotionType.RANGING -> getInventoryItemCount(*RANGING_POTIONS.sliceArray(0..1)) > 0
-            Constants.RangePotionType.DIVINE_RANGING -> getInventoryItemCount(*DIVINE_RANGING_POTIONS.sliceArray(0..1)) > 0
+            Constants.RangePotionType.RANGING -> getInventoryItemCount(*RANGING_POTIONS) > count || getInventoryItemCount(
+                *RANGING_POTIONS.sliceArray(0..1)
+            ) > 0
+
+            Constants.RangePotionType.DIVINE_RANGING -> getInventoryItemCount(*DIVINE_RANGING_POTIONS) > count || getInventoryItemCount(
+                *RANGING_POTIONS.sliceArray(0..1)
+            ) > 0
+
             else -> false
         }
 
@@ -113,21 +131,12 @@ sealed class Potion(open val count: Int) {
         }
 
         override fun getPotionsToDeposit(): List<Item> {
-            val itemsToDeposit = mutableListOf<Item>()
-            if (type == Constants.RangePotionType.RANGING) {
-                RANGING_POTIONS.sliceArray(0..1).forEach { dose ->
-                    getInventoryItem(dose).let {
-                        if (it.valid()) itemsToDeposit.add(it)
-                    }
-                }
-                // Similar logic for three and four dose if needed
-            }
-            return itemsToDeposit
+            return getInventoryItems(*RANGING_POTIONS, *DIVINE_RANGING_POTIONS)
         }
 
         override fun getPotionToDrink(): Item = when (type) {
-            Constants.RangePotionType.RANGING -> getInventoryItem(*RANGING_POTIONS.sliceArray(0..3))
-            Constants.RangePotionType.DIVINE_RANGING -> getInventoryItem(*DIVINE_RANGING_POTIONS.sliceArray(0..3))
+            Constants.RangePotionType.RANGING -> getInventoryItem(*RANGING_POTIONS)
+            Constants.RangePotionType.DIVINE_RANGING -> getInventoryItem(*DIVINE_RANGING_POTIONS)
             else -> Item.Nil
         }
     }
@@ -143,11 +152,13 @@ sealed class Potion(open val count: Int) {
         }
 
         override fun shouldDeposit() = when (type) {
-            Constants.PrayerPotionType.PRAYER -> (getInventoryItemCount(*PRAYER_POTIONS.sliceArray(0..1)) > 0 ||
-                    getInventoryItemCount(*PRAYER_POTIONS.sliceArray(2..3)) > count)
+            Constants.PrayerPotionType.PRAYER -> getInventoryItemCount(*PRAYER_POTIONS) > count || getInventoryItemCount(
+                *PRAYER_POTIONS.sliceArray(0..1)
+            ) > 0
 
-            Constants.PrayerPotionType.SUPER_RESTORE -> (getInventoryItemCount(*SUPER_RESTORE_POTIONS.sliceArray(0..1)) > 0 ||
-                    getInventoryItemCount(*SUPER_RESTORE_POTIONS.sliceArray(2..3)) > count) || getInventoryItemCount(*PRAYER_POTIONS) > 0
+            Constants.PrayerPotionType.SUPER_RESTORE -> getInventoryItemCount(*PRAYER_POTIONS) > 0 || getInventoryItemCount(
+                *SUPER_RESTORE_POTIONS
+            ) > count || getInventoryItemCount(*SUPER_RESTORE_POTIONS.sliceArray(0..1)) > 0
         }
 
         override fun getPotionToWithdraw(): Item = when (type) {
@@ -156,34 +167,7 @@ sealed class Potion(open val count: Int) {
         }
 
         override fun getPotionsToDeposit(): List<Item> {
-            // Need to handle low-dose potions manually here, otherwise there's a weird withdraw loop that happens
-            if (type == Constants.PrayerPotionType.PRAYER) {
-                val lowDosePotion = getInventoryItems(*PRAYER_POTIONS.sliceArray(0..1))
-                if (lowDosePotion.isNotEmpty()) {
-                    return lowDosePotion
-                }
-
-                val threeDosePotions = getInventoryItems(Constants.PRAYER_POTION_3_ID)
-                if (threeDosePotions.isNotEmpty()) {
-                    return threeDosePotions
-                }
-
-                return getInventoryItems(Constants.PRAYER_POTION_4_ID)
-            }
-
-            val prayerPotions = getInventoryItems(*PRAYER_POTIONS)
-            val lowDosePotions = getInventoryItems(*SUPER_RESTORE_POTIONS.sliceArray(0..1))
-
-            if (prayerPotions.isNotEmpty() || lowDosePotions.isNotEmpty()) {
-                return (prayerPotions + lowDosePotions)
-            }
-
-            val threeDosePotion = getInventoryItems(Constants.SUPER_RESTORE_3_ID)
-            if (threeDosePotion.isNotEmpty()) {
-                return threeDosePotion
-            }
-
-            return getInventoryItems(Constants.SUPER_RESTORE_4_ID)
+            return getInventoryItems(*PRAYER_POTIONS, *SUPER_RESTORE_POTIONS)
         }
 
         override fun getPotionToDrink(): Item {

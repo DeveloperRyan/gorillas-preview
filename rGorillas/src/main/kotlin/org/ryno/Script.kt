@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 @ScriptManifest(
     name = "rGorillas",
     description = "Kills demonic gorillas for money",
-    version = "2.5.1",
+    version = "2.5.5",
     author = "ryno",
     category = ScriptCategory.MoneyMaking
 )

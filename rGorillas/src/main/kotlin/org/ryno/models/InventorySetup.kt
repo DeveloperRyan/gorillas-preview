@@ -1,5 +1,6 @@
 package org.ryno.models
 import org.ryno.Constants
+import kotlin.math.max
 
 data class InventorySetup(
     val foodId: Int = Constants.SHARK_ID,
@@ -21,7 +22,10 @@ object InventorySetupFactory {
         var prayerPotionType: Constants.PrayerPotionType = Constants.PrayerPotionType.PRAYER
         var prayerPotionCount: Int = 0
 
+        var attackPotionCount = 0
+        var strengthPotionCount = 0
         inventorySetupMap.forEach { (item, count) ->
+
             when {
                 isFood(item) -> foodId = item
                 isPrayerPotion(item) -> {
@@ -40,9 +44,13 @@ object InventorySetupFactory {
                     rangePotionType = Constants.RangePotionType.DIVINE_RANGING
                     rangePotionCount += count
                 }
-                isSuperCombatSet(item) -> {
+                isAttackPotion(item) -> {
                     combatPotionType = Constants.CombatPotionType.SUPER_SET
-                    combatPotionCount += count
+                    attackPotionCount += count
+                }
+                isStrengthPotion(item) -> {
+                    combatPotionType = Constants.CombatPotionType.SUPER_SET
+                    strengthPotionCount += count
                 }
                 isCombatPotion(item) -> {
                     combatPotionType = Constants.CombatPotionType.SUPER_COMBAT
@@ -55,6 +63,10 @@ object InventorySetupFactory {
             }
         }
 
+        if (combatPotionType == Constants.CombatPotionType.SUPER_SET) {
+            combatPotionCount = max(attackPotionCount, strengthPotionCount)
+        }
+
         return InventorySetup(foodId, combatPotionType, combatPotionCount, rangePotionType, rangePotionCount, prayerPotionType, prayerPotionCount)
     }
 
@@ -63,7 +75,8 @@ object InventorySetupFactory {
     private fun isSuperRestorePotion(item: Int) = item in Constants.SUPER_RESTORE_POTIONS
     private fun isRangingPotion(item: Int) = item in Constants.RANGING_POTIONS
     private fun isDivineRangingPotion(item: Int) = item in Constants.DIVINE_RANGING_POTIONS
-    private fun isSuperCombatSet(item: Int) = item in Constants.SUPER_COMBAT_POTION_SET
+    private fun isAttackPotion(item: Int) = item in Constants.ATTACK_POTIONS
+    private fun isStrengthPotion(item: Int) = item in Constants.STRENGTH_POTIONS
     private fun isCombatPotion(item: Int) = item in Constants.COMBAT_POTIONS
     private fun isDivineCombatPotion(item: Int) = item in Constants.DIVINE_COMBAT_POTIONS
 }

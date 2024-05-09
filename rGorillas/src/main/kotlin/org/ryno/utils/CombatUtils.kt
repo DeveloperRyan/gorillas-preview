@@ -18,9 +18,9 @@ object CombatUtils {
 
     fun getActivePrayer(overheadId: Int): Prayer.Effect? {
         return when (overheadId) {
-            0 -> Prayer.Effect.PROTECT_FROM_MELEE
-            1 -> Prayer.Effect.PROTECT_FROM_MISSILES
-            2 -> Prayer.Effect.PROTECT_FROM_MAGIC
+            Constants.MELEE_OVERHEAD_ID -> Prayer.Effect.PROTECT_FROM_MELEE
+            Constants.MISSILES_OVERHEAD_ID -> Prayer.Effect.PROTECT_FROM_MISSILES
+            Constants.MAGIC_OVERHEAD_ID -> Prayer.Effect.PROTECT_FROM_MAGIC
             else -> null
         }
     }
@@ -61,5 +61,13 @@ object CombatUtils {
 
     fun hasSpecialAttackWeaponEquipped(specialAttackWeaponId: Int): Boolean {
         return Equipment.itemAt(Equipment.Slot.MAIN_HAND).id == specialAttackWeaponId
+    }
+
+    fun isHealingSpecialAttack(specialAttackWeaponId: Int): Boolean {
+        return when (specialAttackWeaponId) {
+            Constants.TOXIC_BLOWPIPE_ID -> true
+            Constants.SARADOMIN_GODSWORD_ID -> true
+            else -> false
+        }
     }
 }

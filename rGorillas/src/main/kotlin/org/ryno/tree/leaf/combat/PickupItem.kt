@@ -27,8 +27,7 @@ class PickupItem(script: Script) : Leaf<Script>(script, "Pickup Item") {
 
             if (it.valid()) {
                 if (it.distance() > 8) {
-                    Movement.step(it.tile)
-                    Condition.wait({ Players.local().trueTile() == it.tile }, 200, 5)
+                    Movement.step(it.tile, 3)
                 }
 
                 if (!it.inViewport()) {

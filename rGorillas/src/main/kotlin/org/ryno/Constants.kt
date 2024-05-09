@@ -245,4 +245,8 @@ object Constants {
     enum class AttackStyles {
         NONE, MELEE, RANGED, MAGIC
     }
+
+    const val MELEE_OVERHEAD_ID = 0
+    const val MISSILES_OVERHEAD_ID = 1
+    const val MAGIC_OVERHEAD_ID = 2
 }

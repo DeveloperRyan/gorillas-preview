@@ -15,6 +15,7 @@ class DrinkPotion(script: Script) : Leaf<Script>(script, "Drink Potion") {
         if (potionToDrink.valid() && potionToDrink.interact("Drink")) {
             Condition.wait({ !potionType.shouldDrink() }, 300, 5)
             State.potionDelay = 3
+            State.foodDelay = 3 // Drinking a potion also blocks food
         }
     }
 }

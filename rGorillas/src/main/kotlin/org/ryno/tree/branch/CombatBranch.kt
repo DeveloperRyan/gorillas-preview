@@ -1,5 +1,6 @@
 package org.ryno.tree.branch
 
+import org.powbot.api.Random
 import org.powbot.api.rt4.*
 import org.powbot.api.script.tree.Branch
 import org.powbot.api.script.tree.SimpleLeaf
@@ -39,7 +40,7 @@ class ShouldKillGorilla(script: Script) : Branch<Script>(script, "Should Fight G
 
     private fun shouldKeepFighting(): Boolean {
         val player = Players.local()
-        return player.inCombat() && player.healthPercent() > 50
+        return player.inCombat() && player.healthPercent() > Random.nextInt(30, 50)
     }
 
     private fun needsRestock(): Boolean {
@@ -72,7 +73,10 @@ class ShouldKillGorilla(script: Script) : Branch<Script>(script, "Should Fight G
         val atGorillas = Constants.GORILLAS_AREA.contains(Players.local())
         // We specifically care about 3/4 dose potions if we're at the bank still
         val hasPrayerPotions =
-            InventoryUtils.getInventoryItemCount(*Constants.PRAYER_POTIONS.sliceArray(2..3)) == script.configuration.prayerPotionCount
+            InventoryUtils.getInventoryItemCount(
+                *Constants.PRAYER_POTIONS.sliceArray(2..3),
+                *Constants.SUPER_RESTORE_POTIONS.sliceArray(2..3)
+            ) == script.configuration.prayerPotionCount
         return InventoryUtils.hasFood() &&
                 (hasPrayerPotions || (Prayer.prayerPoints() > 20 && atGorillas))
     }
@@ -110,7 +114,7 @@ class ShouldChangeOverheadPrayer(script: Script) : Branch<Script>(script, "Shoul
             State.roarDelay = 4
 
             when (State.gorillaAttackStyle) {
-                Constants.AttackStyles.MELEE -> State.gorillaAttackStyle = Constants.AttackStyles.RANGED
+                Constants.AttackStyles.MELEE -> State.gorillaAttackStyle = listOf(Constants.AttackStyles.MAGIC, Constants.AttackStyles.RANGED).random()
                 Constants.AttackStyles.RANGED -> State.gorillaAttackStyle = Constants.AttackStyles.MAGIC
                 Constants.AttackStyles.MAGIC -> State.gorillaAttackStyle = Constants.AttackStyles.RANGED
                 else -> Constants.AttackStyles.NONE
@@ -226,10 +230,17 @@ class ShouldEquipSpecialAttackWeapon(script: Script) : Branch<Script>(script, "S
 
     override fun validate(): Boolean {
         val specWeapon = script.configuration.specialAttackWeapon
+        val isReadyForHealingSpecial = if (CombatUtils.isHealingSpecialAttack(specWeapon.itemId)) {
+            Players.local().healthPercent() <= 90
+        } else {
+            true
+        }
+
         return (specWeapon != SpecialAttackWeapon.NONE &&
                 !CombatUtils.hasSpecialAttackWeaponEquipped(specWeapon.itemId) &&
                 State.playerAttackStyle == specWeapon.style &&
-                Combat.specialPercentage() >= 50)
+                Combat.specialPercentage() >= 50 && isReadyForHealingSpecial
+                )
     }
 }
 
@@ -239,10 +250,17 @@ class ShouldUseSpecialAttack(script: Script) : Branch<Script>(script, "Should Us
 
     override fun validate(): Boolean {
         val specWeapon = script.configuration.specialAttackWeapon
+        val isReadyForHealingSpecial = if (CombatUtils.isHealingSpecialAttack(specWeapon.itemId)) {
+            Players.local().healthPercent() <= 90
+        } else {
+            true
+        }
+
         return (specWeapon != SpecialAttackWeapon.NONE &&
                 CombatUtils.hasSpecialAttackWeaponEquipped(specWeapon.itemId) &&
                 State.playerAttackStyle == specWeapon.style &&
-                Combat.specialPercentage() >= 50)
+                Combat.specialPercentage() >= 50 &&
+                isReadyForHealingSpecial)
     }
 }
 
@@ -262,7 +280,7 @@ class ShouldDrinkPotion(script: Script) : Branch<Script>(script, "Should Drink P
     override val successComponent: TreeComponent<Script> = DrinkPotion(script)
 
     override fun validate(): Boolean {
-        return script.configuration.potions.any { it.shouldDrink() }
+        return script.configuration.potions.any { it.shouldDrink() } && State.potionDelay <= 0
     }
 }
 

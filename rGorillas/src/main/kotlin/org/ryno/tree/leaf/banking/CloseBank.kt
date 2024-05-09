@@ -8,7 +8,7 @@ import org.ryno.Script
 class CloseBank(script: Script) : Leaf<Script>(script, "Close Bank") {
     override fun execute() {
         script.localLogger.info("Closing bank")
-        if (Bank.opened() && Bank.close()) {
+        if (Bank.close()) {
             Condition.wait({ !Bank.opened() }, 300, 4)
         }
     }
